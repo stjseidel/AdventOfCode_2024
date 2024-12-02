@@ -16,6 +16,9 @@ from shutil import copy2
 from math import gcd 
 from functools import reduce 
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from dotenv import get_key
 
 
 class AOC():
@@ -33,9 +36,13 @@ class AOC():
         self.day = day
         self.start()
         self.input_folder = Path('input')
+        self.input = self.input_folder / f'{self.day}.txt'
+        self.input_simple = self.input_folder  / f'{self.day}_simple.txt'
         self.read_both_files()
         self.set_lines(simple=simple)
         self.simple = simple
+        
+        
     def start(self):
         self.beginning = timer()
         
@@ -102,12 +109,56 @@ class AOC():
         return t
     
     def create_txt_files(self):
-        files = [Path(f'{self.input_folder}/{self.day}{txt}') for txt in ['_simple.txt', '.txt']]
-        for file in files:
-            if not file.exists():
-                file.touch()
-                print('created ', file)
+        if not self.input.exists():
+            self.fetch_input(int(self.day))
+        if not self.input_simple.exists():
+            self.fetch_input_simple(int(self.day))
                 
+    def get_soup(self, url):
+        """Helper function to fetch the BeautifulSoup object for the day's page."""
+        # url = f"https://adventofcode.com/2024/day/{day}"
+        session_cookie = get_key('.env', 'SESSION_COOKIE')
+        # Set up the headers with the session cookie
+        HEADERS = {
+            'Cookie': f'session={session_cookie}'
+        }
+        response = requests.get(url, headers=HEADERS)
+        session_cookie = None
+        if response.status_code == 200:
+            return BeautifulSoup(response.text, 'html.parser')
+        else:
+            print(f"Failed to fetch page for day {day}: {response.status_code}")
+            return None        
+    
+    def fetch_input_simple(self, day: int):
+        """Fetch and store the code from the <code> tag into 'day_simple.txt'."""
+        url = f"https://adventofcode.com/2024/day/{day}"
+        soup = self.get_soup(url)
+        if soup:
+            code_tag = soup.find('code')
+            if code_tag:
+                code_content = code_tag.get_text()
+                
+                file_path = self.input_simple
+                with open(file_path, 'w') as file:
+                    file.write(code_content)
+                print(f"Saved simple code for day {day} to {file_path}")
+            else:
+                print(f"No <code> tag found for day {day}")
+            
+    def fetch_input(self, day: int):
+        """Fetch and store the input from the <pre> tag into 'day.txt'."""
+        url = f"https://adventofcode.com/2024/day/{day}/input"
+        soup = self.get_soup(url)
+        if soup:
+            file_path = self.input
+            with open(file_path, 'w') as file:
+                file.write(soup.text)
+            print(f"Saved input for day {day} to {file_path}")
+        else:
+            print(f"No input found for day {day}")
+
+    
     def copy_template(self):
         this_file = Path(f'{str(self.day).zfill(2)}.py')
         if not this_file.exists():
@@ -144,10 +195,15 @@ class AOC():
 
                 
 if __name__ == '__main__':
-    days = [str(i).zfill(2) for i in range(1, 25)]
-    for day in days:
-        today = AOC(day=day)
-        today.create_txt_files()
-        today.copy_template()
+# =============================================================================
+#     days = [str(i).zfill(2) for i in range(1, 25)]
+#     for day in days:
+#         today = AOC(day=day)
+#         today.create_txt_files()
+#         today.copy_template()
+# =============================================================================
+    day = '02'
+    today = AOC(day=day)
+    today.create_txt_files()
     # today.start()
     # today.stop
