@@ -38,9 +38,12 @@ class AOC():
         self.input_folder = Path('input')
         self.input = self.input_folder / f'{self.day}.txt'
         self.input_simple = self.input_folder  / f'{self.day}_simple.txt'
-        self.read_both_files()
-        self.set_lines(simple=simple)
         self.simple = simple
+        self.passed_days = min(datetime.now(), datetime(2024, 12, 24)).day
+        if int(self.day) <= int(self.passed_days):        
+            self.create_txt_files()
+            self.read_both_files()
+            self.set_lines(simple=simple)
         
         
     def start(self):
@@ -195,15 +198,14 @@ class AOC():
 
                 
 if __name__ == '__main__':
-# =============================================================================
-#     days = [str(i).zfill(2) for i in range(1, 25)]
-#     for day in days:
-#         today = AOC(day=day)
-#         today.create_txt_files()
-#         today.copy_template()
-# =============================================================================
-    day = '02'
-    today = AOC(day=day)
-    today.create_txt_files()
+    days = [str(i).zfill(2) for i in range(1, 25)]
+    
+    for day in days:
+        today = AOC(day=day)
+        today.copy_template()
+       
+    # day = '02'
+    # today = AOC(day=day)
+    # today.create_txt_files()
     # today.start()
     # today.stop
