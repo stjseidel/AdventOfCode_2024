@@ -8,7 +8,6 @@ Created on Mon Dec  4 06:32:12 2023
 
 from aoc_class import AOC
 from timeit import default_timer as timer
-
     
 class Today(AOC):
         
@@ -19,13 +18,36 @@ class Today(AOC):
     
     def part1(self):
         lines = self.parse_lines()
-        self.result1 = 'TODO'
+        result = 0
+        for line in lines:
+            # line = self.extract_only_selected_characters(line, pattern=r'[^mul(),\d]')
+            matches = self.extract_patterns_from_string(line=line, pattern=r'mul\(\d{1,3},\d{1,3}\)')
+            for match in matches:
+                numbers = self.extract_only_selected_characters(match, pattern=r'[^,\d]')
+                left, right = [int(num) for num in numbers.split(',')]
+                result += left * right
+        self.result1 = result
         self.time1 = timer()
         return self.result1
                 
     def part2(self):
-        lines = self.parse_lines()
-        self.result2 = 'TODO'
+        # lines = self.parse_lines()
+        lines = self.lines
+        result = 0
+        active = True
+        for line in lines:
+            # line = self.extract_only_selected_characters(line, pattern=r'[^mul(),\d]')
+            matches = self.extract_patterns_from_string(line=line, pattern=r"mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\)")
+            for match in matches:
+                if match == 'do()':
+                    active = True
+                elif match == "don't()":
+                    active = False
+                elif active == True:
+                    numbers = self.extract_only_selected_characters(match, pattern=r'[^,\d]')
+                    left, right = [int(num) for num in numbers.split(',')]
+                    result += left * right
+        self.result2 = result
         self.time2 = timer()
         return self.result2
         
@@ -44,27 +66,22 @@ if __name__ == '__main__':
     today.part1()
     print(f'Part 1 <SIMPLE> result is: {today.result1}')
     
-# =============================================================================
-# # hard part 1
-#     today.set_lines(simple=False)
-#     today.part1()
-#     print(f'Part 1 <HARD> result is: {today.result1}')
-#     today.stop()
-# =============================================================================
+# hard part 1
+    today.set_lines(simple=False)
+    today.part1()
+    print(f'Part 1 <HARD> result is: {today.result1}')
+    today.stop()
 
 
-# =============================================================================
-# # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
-# =============================================================================
+# simple part 2
+    # today.set_lines(simple=True) 
+    today.lines = today.read_lines(r'03_simple_2.txt')
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()

@@ -103,6 +103,18 @@ class AOC():
     def extract_numbers_from_string(self, line):
         # pattern = re.compile('\d+\.[.\d]+')
         return str(''.join(filter(str.isdigit, line)))
+    
+    def extract_patterns_from_string(self, line, pattern):
+        # pattern = re.compile('\d+\.[.\d]+')
+        matches = re.findall(pattern, string=line)
+        if matches:
+            return [match for match in matches]
+        else:
+            return []
+        
+    def extract_only_selected_characters(self, line, pattern):
+        # character_class = '[^mul(),\d]'
+        return re.sub(pattern, '', line)
 
     def replace_with_dict(self, text, conversion_dict, before=None):
         before = before or str.lower
