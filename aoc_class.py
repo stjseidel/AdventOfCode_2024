@@ -172,7 +172,6 @@ class AOC():
             print(f"Saved input for day {day} to {file_path}")
         else:
             print(f"No input found for day {day}")
-
     
     def copy_template(self):
         this_file = Path(f'{str(self.day).zfill(2)}.py')
@@ -208,6 +207,24 @@ class AOC():
         lines = lines or self.lines
         return self.border_coordinates(len(lines[0]), len(lines))
 
+    def flatten_lists(self, lists):
+        return [item for sublist in lists for item in sublist]
+    
+    def grid_make_empty(self):
+        self.grid = [['.' for c in row] for row in self.lines]
+
+    def grid_enter_result(self, this_list=None):
+        this_list = this_list or self.this_list
+        for c, char in enumerate(self.term):
+            pair = this_list[c]
+            # self.grid[pair[0]][pair[1]] = char
+            self.grid[pair[0]][pair[1]] = self.lines[pair[0]][pair[1]]
+        # print(self.grid)
+        
+    def print_grid(self, grid=None):
+        grid = grid or self.grid
+        for line in grid:
+            print(''.join(line))
                 
 if __name__ == '__main__':
     days = [str(i).zfill(2) for i in range(1, 25)]
