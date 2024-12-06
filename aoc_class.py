@@ -213,12 +213,13 @@ class AOC():
     def grid_make_empty(self):
         self.grid = [['.' for c in row] for row in self.lines]
 
-    def grid_enter_result(self, this_list=None):
+    def grid_enter_result(self, this_list=None, term=None):
         this_list = this_list or self.this_list
-        for c, char in enumerate(self.term):
+        term = term or self.term
+        for c, char in enumerate(term):
             pair = this_list[c]
             # self.grid[pair[0]][pair[1]] = char
-            self.grid[pair[0]][pair[1]] = self.lines[pair[0]][pair[1]]
+            self.grid[pair[0]][pair[1]] = char or self.lines[pair[0]][pair[1]]
         # print(self.grid)
         
     def print_grid(self, grid=None):
