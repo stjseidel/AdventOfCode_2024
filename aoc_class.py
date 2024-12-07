@@ -167,6 +167,7 @@ class AOC():
         soup = self.get_soup(url)
         if soup:
             file_path = self.input
+            file_path.parent.mkdir(exist_ok=True, parents=True)
             with open(file_path, 'w') as file:
                 file.write(soup.text)
             print(f"Saved input for day {day} to {file_path}")
