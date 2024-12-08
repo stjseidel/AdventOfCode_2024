@@ -22,9 +22,13 @@ class TestAdventOfCode(unittest.TestCase):
     def test_all_days(self):
         # Iterate through all available solution files
         passed_days = min(datetime.now(), datetime(2024, 12, 24)).day
-        for file in [Path(f'{str(i).zfill(2)}.py') for i in range(1, passed_days+1)]:
+        for file in [Path(f'day_{str(i).zfill(2)}.py') for i in range(1, passed_days+1)]:
             day = file.stem  # Extract day, e.g., "01"
-            module_name = day  # Remove ".py" for import
+            if '_' in day:
+                day = day.split('_')[-1]
+            if not file.exists():
+                file = Path(f'{day}.py')
+            module_name = file.stem  # Remove ".py" for import
             
             with self.subTest(day=day):
                 self._test_day(module_name, day)
@@ -34,6 +38,7 @@ class TestAdventOfCode(unittest.TestCase):
             module = importlib.import_module(module_name)
             Today = getattr(module, "Today")
             solver = Today(day=day, simple=False)
+            solver.set_lines(simple=False)
 
             for part in ("part1", "part2"):
                 expected = self.expected_results.get(day, {}).get(part)
@@ -49,7 +54,6 @@ class TestAdventOfCode(unittest.TestCase):
                     print(f"Day {day}, {part}: No expected result stored.")
         except Exception as e:
             self.fail(f"Error testing day {day}: {e}")
-
 
 if __name__ == "__main__":
     unittest.main()

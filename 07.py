@@ -15,26 +15,26 @@ class Today(AOC):
         
     def parse_lines(self, file_path=''):
         lines = self.lines
-        self.lines = {int(line.split(':')[0]): [int(val) for val in line.split(':')[1].strip().split(' ')] for line in lines}
+        self.lines_dict = {int(line.split(':')[0]): [int(val) for val in line.split(':')[1].strip().split(' ')] for line in lines}
         # lines = [[int(lin) for lin in line.split(' ') if set(lin) != set('') ] for line in lines]
         return self.lines
     
     def part1(self):
-        lines = self.parse_lines()
+        _ = self.parse_lines()
         self.operations = ['+', '*']
         self.result1 = self.check_operations()
         self.time1 = timer()
         return self.result1
 
     def check_operations(self, operations=None):
-        operations = operations or self.lines
+        operations = operations or self.lines_dict
         lines_result = 0
         for result, values in operations.items():
             lines_result += self.check_operation(result, values)
         return lines_result
 
     def part2(self):
-        lines = self.parse_lines()
+        _ = self.parse_lines()
         self.operations = ['+', '*', '||']
         self.result2 = self.check_operations()
         self.time2 = timer()
