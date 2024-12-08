@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from shutil import copy2
+from collections import defaultdict
 
 from math import gcd 
 from functools import reduce 
@@ -227,6 +228,26 @@ class AOC():
         for line in grid:
             print(''.join(line))
                 
+    def grid_extract_all_character_positions_to_dict(self, lines=None, ignore_chars=['.']):
+        lines = lines or self.lines
+        positions = defaultdict(lambda: [])
+        for row, line in enumerate(lines):
+            for col, char in enumerate(line):
+                if char not in ignore_chars:
+                    positions[char].append((row, col))
+        return positions
+                
+    def grid_make_all_positions(self, lines=None, ignore_chars=[]):
+        """create a set of all possile positions in the grid. leave out positions with ignore_chars."""
+        lines = lines or self.lines
+        positions = set()
+        for row, line in enumerate(lines):
+            for col, char in enumerate(line):
+                if char not in ignore_chars:
+                    positions.add((row, col))
+        return positions
+        
+        
 if __name__ == '__main__':
     days = [str(i).zfill(2) for i in range(1, 25)]
     
