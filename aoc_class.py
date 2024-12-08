@@ -17,6 +17,7 @@ from collections import defaultdict
 from math import gcd 
 from functools import reduce 
 import pandas as pd
+import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from dotenv import get_key
@@ -30,6 +31,8 @@ class AOC():
             except Exception as e:
                 print('Tried to set day from __file__: ', e)
                 day = str(datetime.today().day).zfill(2)
+        if '_' in day:
+            day = day.split('_')[-1]
         day = str(day).zfill(2)
         print('Working on day: ', day)
         self.template = Path('template.py')
@@ -45,7 +48,7 @@ class AOC():
             self.create_txt_files()
             self.read_both_files()
             self.set_lines(simple=simple)
-        
+        self.this_list = []
         
     def start(self):
         self.beginning = timer()
@@ -176,7 +179,7 @@ class AOC():
             print(f"No input found for day {day}")
     
     def copy_template(self):
-        this_file = Path(f'{str(self.day).zfill(2)}.py')
+        this_file = Path(f'day_{str(self.day).zfill(2)}.py')
         if not this_file.exists():
             copy2(self.template, this_file)
                 
@@ -215,29 +218,47 @@ class AOC():
     def grid_make_empty(self):
         self.grid = [['.' for c in row] for row in self.lines]
 
-    def grid_enter_result(self, this_list=None, term=None):
+    def grid_enter_result(self, this_list=None, term=None, print_grid=False):
         this_list = this_list or self.this_list
+        if this_list == []:
+            return None
         term = term or self.term
+        if type(term) != list:
+            term = list(term)
+        if len(term) < len(this_list):
+            term = term + term[0] * (len(this_list) - len(term))
         for c, char in enumerate(term):
             pair = this_list[c]
             # self.grid[pair[0]][pair[1]] = char
             self.grid[pair[0]][pair[1]] = char or self.lines[pair[0]][pair[1]]
-        # print(self.grid)
+            if print_grid:
+                self.print_grid()
         
     def print_grid(self, grid=None):
         grid = grid or self.grid
         for line in grid:
             print(''.join(line))
                 
+# =============================================================================
+#     def grid_extract_all_character_positions_to_dict(self, lines=None, ignore_chars=['.']):
+#         lines = lines or self.lines
+#         positions = defaultdict(lambda: [])
+#         for row, line in enumerate(lines):
+#             for col, char in enumerate(line):
+#                 if char not in ignore_chars:
+#                     positions[char].append((row, col))
+#         return positions
+# =============================================================================
     def grid_extract_all_character_positions_to_dict(self, lines=None, ignore_chars=['.']):
         lines = lines or self.lines
-        positions = defaultdict(lambda: [])
+        positions = defaultdict(lambda: np.empty((0, 2), dtype=int))  # Default to empty NumPy array
         for row, line in enumerate(lines):
             for col, char in enumerate(line):
                 if char not in ignore_chars:
-                    positions[char].append((row, col))
+                    new_pos = np.array([[row, col]])  # Create a new NumPy array for the position
+                    positions[char] = np.vstack((positions[char], new_pos))  # Stack positions
         return positions
-                
+    
     def grid_make_all_positions(self, lines=None, ignore_chars=[]):
         """create a set of all possile positions in the grid. leave out positions with ignore_chars."""
         lines = lines or self.lines
@@ -247,7 +268,6 @@ class AOC():
                 if char not in ignore_chars:
                     positions.add((row, col))
         return positions
-        
         
 if __name__ == '__main__':
     days = [str(i).zfill(2) for i in range(1, 25)]
