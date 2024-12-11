@@ -96,6 +96,7 @@ class Today(AOC):
         # print(f'starting at start: {self.print_coords(start)}')
         pop_list = []
         reached_targets = set()
+        routes = 1
         while len(newly_added) > 0:
             this_set = newly_added.copy()
             newly_added = []
@@ -116,14 +117,19 @@ class Today(AOC):
                 _ = [self.lookup.pop((i.row, i.col)) for i in pop_tuples]
                 pop_list = []
         self.reached_targets_count += len(reached_targets)
-        self.print_grid()
         self.total_score += score
         print(f'starting at start: {self.print_coords(start)}: Score {score} / {self.total_score}')
         
     
     def part2(self):
         lines = self.parse_lines()
-        self.result2 = 'TODO'
+        Matrix = {(row, col): int(char) for row, line in enumerate(lines) for col, char in enumerate(line)}
+        Neighbors = {(row, col):{(row+1, col),(row, col+1),(row-1, col),(row, col-1)} & Matrix.keys() for (row, col) in Matrix}
+        
+        traverse = lambda coord: [coord] if Matrix[coord] == 9 else sum([traverse(neighbor) for neighbor in Neighbors[coord] if Matrix[neighbor] == Matrix[coord] + 1], [])
+        
+        result = sum(len(traverse(start)) for start in Matrix.keys() if Matrix[start] == 0)
+        self.result2 = result
         self.time2 = timer()
         return self.result2
         
@@ -150,18 +156,14 @@ if __name__ == '__main__':
     # 1413 too high
     print(today.reached_targets_count)
 
-# =============================================================================
-# # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
-# =============================================================================
+# simple part 2
+    today.set_lines(simple=True) 
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()
