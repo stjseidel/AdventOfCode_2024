@@ -36,7 +36,7 @@ class Today(AOC):
         self.start_positions = list(filter(self.is_start, self.all_positions))
         self.target_positions = list(filter(self.is_target, self.all_positions))
         # lines = [[int(lin) for lin in line.split(' ') if set(lin) != set('') ] for line in lines]
-        print(f'starts: {len(self.start_positions)}; targets: {len(self.target_positions)}; total_positions: {len(self.all_positions)}')
+        # print(f'starts: {len(self.start_positions)}; targets: {len(self.target_positions)}; total_positions: {len(self.all_positions)}')
         return lines
     
     def is_start(self, coord):
@@ -118,7 +118,7 @@ class Today(AOC):
                 pop_list = []
         self.reached_targets_count += len(reached_targets)
         self.total_score += score
-        print(f'starting at start: {self.print_coords(start)}: Score {score} / {self.total_score}')
+        # print(f'starting at start: {self.print_coords(start)}: Score {score} / {self.total_score}')
         
     
     def part2(self):
@@ -147,14 +147,12 @@ if __name__ == '__main__':
     today.set_lines(simple=True)
     today.part1()
     print(f'Part 1 <SIMPLE> result is: {today.result1}')
-    print(today.reached_targets_count)
+
 # hard part 1
     today.set_lines(simple=False)
     today.part1()
     print(f'Part 1 <HARD> result is: {today.result1}')
     today.stop()
-    # 1413 too high
-    print(today.reached_targets_count)
 
 # simple part 2
     today.set_lines(simple=True) 
