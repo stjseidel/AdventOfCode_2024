@@ -118,7 +118,7 @@ class Today(AOC):
         return self.result2
     
     def defragment(self):    
-        files = []
+        files = {}
         spaces = []
         Range = namedtuple('Range', ['file_num', 'size', 'start_position', 'file_type', 'overwritten'])
         disk_pos = 0
@@ -126,15 +126,17 @@ class Today(AOC):
             size = int(num)
             if i % 2 == 0:  # is file
                 file_num = i // 2
-                files.append(Range(file_num=file_num, size=size, start_position=disk_pos, file_type='file', overwritten='N/A'))
+                if size > 0:
+                    files[file_num] = Range(file_num=file_num, size=size, start_position=disk_pos, file_type='file', overwritten='N/A')
             else:
                 file_num = i // 2
-                spaces.append(Range(file_num=file_num, size=size, start_position=disk_pos, file_type='space', overwritten=False))
+                if size > 0:
+                    spaces.append(Range(file_num=file_num, size=size, start_position=disk_pos, file_type='space', overwritten=False))
             disk_pos += size
         
         for nth_file in range(len(files)-1, -1, -1):
             file = files[nth_file]
-            print(nth_file, file.file_num, file.start_position)
+            # print(nth_file, file.file_num, file.start_position)
             
             for n, space in enumerate(spaces):
                 if space.start_position > file.start_position:
@@ -142,30 +144,26 @@ class Today(AOC):
                 elif space.overwritten:
                     continue
                 if space.size >= file.size:
-                    print('old:', file)
-                    files[nth_file] = Range(file_num=file.file_num, size=file.size, start_position=space.start_position, file_type='file', overwritten='N/A')
+                    # print('old:', file)
+                    files[nth_file] = Range(file_num=file.file_num, size=file.size, start_position=space.start_position, file_type='file_moved', overwritten='N/A')
                     if file.size < space.size:
-                        print(spaces[n])
-                        spaces[n] = Range(file_num=space.file_num, size=file.size, start_position=space.start_position, file_type=space.file_type + '_split', overwritten=True)
-                        spaces.insert(n+1, Range(file_num=space.file_num, size=space.size-file.size, start_position=space.start_position+(space.size-file.size)+1, file_type='new', overwritten=False))
-                        print(spaces[n])
-                        print('added new space:\n', spaces[n+1])
+                        # print(spaces[n])
+                        # spaces[n] = Range(file_num=space.file_num, size=file.size, start_position=space.start_position, file_type=space.file_type + '_split', overwritten=True)
+                        # spaces.insert(n+1, Range(file_num=space.file_num, size=space.size-file.size, start_position=space.start_position+file.size, file_type='new', overwritten=False))
+                        spaces[n] = Range(file_num=space.file_num, size=space.size-file.size, start_position=space.start_position+file.size, file_type='split', overwritten=False)
+                        # print(spaces[n])
+                        # print('added new space:\n', spaces[n])
                     else:
-                        spaces[n] = Range(file_num=space.file_num, size=space.size, start_position=space.start_position, file_type='space', overwritten=True)
-                    print('new:', files[nth_file])
+                        # spaces[n] = Range(file_num=space.file_num, size=space.size, start_position=space.start_position, file_type='space', overwritten=True)
+                        spaces.pop(n)
+                    # print('new:', files[nth_file])
                     break
-        for space in spaces:
-            print(space)
+        # for space in spaces:
+        #     print(space)
         return files
     
     def calc_checksum(self, files):
-        # print('check_sum:')
-        check_sum = 0
-        for file in files:
-            for i in range(file.size):
-                start_pos = file.start_position
-                check_sum += (start_pos + i) * file.file_num
-                print(file.file_num, file.start_position+i, file.size, check_sum)
+        check_sum = sum([sum([file.file_num * (file.start_position+i) for i in range(file.size)]) for file in files.values()])
         self.check_sum = check_sum
         
     def print_final(self):
@@ -195,12 +193,10 @@ if __name__ == '__main__':
     today.part2()
     print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()
     # 6427431214608 too low
