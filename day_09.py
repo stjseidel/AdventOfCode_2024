@@ -128,7 +128,8 @@ class Today(AOC):
                 file_num = i // 2
                 files.append(Range(file_num=file_num, size=size, start_position=disk_pos, file_type='file', overwritten='N/A'))
             else:
-                spaces.append(Range(file_num=-1, size=size, start_position=disk_pos, file_type='space', overwritten=False))
+                file_num = i // 2
+                spaces.append(Range(file_num=file_num, size=size, start_position=disk_pos, file_type='space', overwritten=False))
             disk_pos += size
         
         for nth_file in range(len(files)-1, -1, -1):
@@ -144,6 +145,7 @@ class Today(AOC):
                     print('old:', file)
                     files[nth_file] = Range(file_num=file.file_num, size=file.size, start_position=space.start_position, file_type='file', overwritten='N/A')
                     if file.size < space.size:
+                        print(spaces[n])
                         spaces[n] = Range(file_num=space.file_num, size=file.size, start_position=space.start_position, file_type=space.file_type + '_split', overwritten=True)
                         spaces.insert(n+1, Range(file_num=space.file_num, size=space.size-file.size, start_position=space.start_position+(space.size-file.size)+1, file_type='new', overwritten=False))
                         print(spaces[n])
@@ -193,10 +195,12 @@ if __name__ == '__main__':
     today.part2()
     print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# hard part 2
-    today.set_lines(simple=False)
-    today.part2()
-    print(f'Part 2 <HARD> result is: {today.result2}')
-    today.stop()
-    today.print_final()
+# =============================================================================
+# # hard part 2
+#     today.set_lines(simple=False)
+#     today.part2()
+#     print(f'Part 2 <HARD> result is: {today.result2}')
+#     today.stop()
+#     today.print_final()
+# =============================================================================
     # 6427431214608 too low
