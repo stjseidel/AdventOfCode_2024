@@ -21,39 +21,72 @@ class Today(AOC):
     
     def part1(self):
         _ = self.parse_lines()
+        self.part = 1
         self.operations = ['+', '*']
-        self.result1 = self.check_operations()
+        self.result1 = self.check_all_formulas_resursive()
         self.time1 = timer()
         return self.result1
 
-    def check_operations(self, operations=None):
-        operations = operations or self.lines_dict
-        lines_result = 0
-        for result, values in operations.items():
-            lines_result += self.check_operation(result, values)
-        return lines_result
-
     def part2(self):
         _ = self.parse_lines()
+        self.part = 2
         self.operations = ['+', '*', '||']
-        self.result2 = self.check_operations()
+        self.result2 = self.check_all_formulas_resursive()
         self.time2 = timer()
         return self.result2
 
-    def check_operation(self, result, values):
-        combos = product(self.operations, repeat=len(values)-1)
-        for combo in product(self.operations, repeat=len(values)-1):
-            line_result = 0
-            for i, value in enumerate(values):
-                if i == 0:
-                    line_result = value
-                elif combo[i-1] == '||':
-                    line_result = int(str(line_result) + str(values[i]))
-                else:
-                    line_result = eval(f'{line_result} {combo[i-1]} {value}')
-            if line_result == result:
-                return result
-        return 0
+# =============================================================================
+#     def part1(self):
+#         _ = self.parse_lines()
+#         self.operations = ['+', '*']
+#         self.result1 = self.check_all_formulas()
+#         self.time1 = timer()
+#         return self.result1
+#     
+#     def check_all_formulas(self, formulas=None):
+#         formulas = formulas or self.lines_dict
+#         lines_result = 0
+#         for result, values in formulas.items():
+#             lines_result += self.check_formula(result, values)
+#         return lines_result
+# 
+#     def check_formula(self, result, values):
+#         combos = product(self.operations, repeat=len(values)-1)
+#         for combo in product(self.operations, repeat=len(values)-1):
+#             line_result = 0
+#             for i, value in enumerate(values):
+#                 if i == 0:
+#                     line_result = value
+#                 elif combo[i-1] == '||':
+#                     line_result = int(str(line_result) + str(values[i]))
+#                 else:
+#                     line_result = eval(f'{line_result} {combo[i-1]} {value}')
+#             if line_result == result:
+#                 return result
+#         return 0
+# =============================================================================
+    
+    def check_all_formulas_resursive(self, formulas=None):
+        formulas = formulas or self.lines_dict
+        lines_result = 0
+        for result, values in formulas.items():
+            lines_result += self.check_formula_resursive(result, values, index=0, sub_result=0)
+        return lines_result
+        
+    def check_formula_resursive(self, result, values, index, sub_result):
+        if index == len(values):
+            return (sub_result == result) * result
+        
+        num = values[index]
+        
+        add_result = self.check_formula_resursive(result=result, values=values, index=index+1, sub_result=sub_result+num)
+        prod_result = self.check_formula_resursive(result=result, values=values, index=index+1, sub_result=sub_result*num)
+        if self.part == 1:
+            concat_result = False
+        else: 
+            concat_result = self.check_formula_resursive(result=result, values=values, index=index+1, sub_result=int(str(sub_result)+str(num)))
+        
+        return add_result or prod_result or concat_result
             
     def print_final(self):
         print(f'Part 1 result is: {self.result1}. (time: {round(self.time1 - self.beginning_of_time, 2)})')
@@ -80,7 +113,7 @@ if __name__ == '__main__':
     today.part2()
     print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# hard part 2
+# # hard part 2
     today.set_lines(simple=False)
     today.part2()
     print(f'Part 2 <HARD> result is: {today.result2}')
