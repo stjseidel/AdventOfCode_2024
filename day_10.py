@@ -13,7 +13,7 @@ from collections import namedtuple
 MapCoord = namedtuple('MapCoord', ['row', 'col', 'height', 'position', 'id_num'])
 
 class Today(AOC):
-        
+    direction_offsets = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     
     def parse_lines(self, file_path=''):
         lines = self.lines
@@ -51,12 +51,23 @@ class Today(AOC):
     def is_adjacent_and_increasing(self, coord, reference):
         # print(f'checking: {self.print_coords(coord)}, {self.print_coords(reference)}')
         coord_diff = ((coord.row - reference.row), (coord.col - reference.col))
-        allowed_diffs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         
-        result = (coord_diff in allowed_diffs) &  ((coord.height - reference.height) in [1, 0])
+        
+        result = (coord_diff in self.direction_offsets) &  ((coord.height - reference.height) in [1])
         # if result:
         #     print('FOUND A MATCH!')
         return result
+    
+    def get_all_neighbor_tuples(self, coord):
+        neighbors = [(coord[0]+offset[0], coord[1]+offset[1]) for offset in self.direction_offsets]
+        return neighbors
+    
+    def get_all_neighbor_coords_if_adjacent_and_free(self, coord, lookup=None):
+        lookup = lookup or self.lookup
+        tuples = self.get_all_neighbor_tuples(coord)
+        tuples = [tup for tup in tuples if tup in lookup.keys()]
+        neighbors = [lookup[tup] for tup in tuples]
+        return neighbors
         
     def print_coords(self, coord):
         print(f'[{coord.row}, {coord.col}, {coord.height}]')
@@ -70,7 +81,7 @@ class Today(AOC):
                 
     def scout_all_paths_starts(self):
         self.total_score = 0
-        
+        self.reached_targets_count = 0
         for start in self.start_positions:
             self.scout_from_start(start)
     
@@ -79,27 +90,32 @@ class Today(AOC):
         score = 0
         start.id_num
         remaining_positions = list(filter(lambda coord: self.is_not_id_num(coord, start.id_num), self.all_positions))
+        self.lookup = {(c.row, c.col):c for c in remaining_positions}
         newly_added = [start]
         self.grid_enter_result(this_list=[(start.row, start.col)], term=str('*'), print_grid=False)
         # print(f'starting at start: {self.print_coords(start)}')
         pop_list = []
+        reached_targets = set()
         while len(newly_added) > 0:
             this_set = newly_added.copy()
             newly_added = []
             for this_start in this_set:
-                for i, coord in enumerate(remaining_positions):
-                    if not i in pop_list:
-                        if self.is_adjacent_and_increasing(coord, this_start):
-                            pop_list.append(i)
-                            self.grid_enter_result(this_list=[(coord.row, coord.col)], term=str(coord.height), print_grid=False)
-                            # print('')
-                            if self.is_target(coord):
-                                score += 1
-                                # print(f'[score: {score}] from <{start.row}, {start.col}>, reached target <{coord.row}, {coord.col}>')
-                            else:
-                                newly_added.append(coord)
-                _ = [remaining_positions.pop(i) for i in sorted(pop_list, reverse=True)]
+                pop_tuples = set()
+                next_possible_positions = self.get_all_neighbor_coords_if_adjacent_and_free(coord=this_start)
+                for coord in next_possible_positions:
+                    if self.is_adjacent_and_increasing(coord, this_start):
+                        pop_tuples.add(coord)
+                        self.grid_enter_result(this_list=[(coord.row, coord.col)], term=str(coord.height)if coord.height < 9 else 'X', print_grid=False)
+                        if self.is_target(coord):
+                            score += 1
+                            reached_targets.add(coord)
+                            # not adding at a target, as it seems to be the case that we stop at a target and do not continue
+                            # print(f'[score: {score}] from <{start.row}, {start.col}>, reached target <{coord.row}, {coord.col}>')
+                        else:
+                            newly_added.append(coord)
+                _ = [self.lookup.pop((i.row, i.col)) for i in pop_tuples]
                 pop_list = []
+        self.reached_targets_count += len(reached_targets)
         self.print_grid()
         self.total_score += score
         print(f'starting at start: {self.print_coords(start)}: Score {score} / {self.total_score}')
@@ -125,13 +141,14 @@ if __name__ == '__main__':
     today.set_lines(simple=True)
     today.part1()
     print(f'Part 1 <SIMPLE> result is: {today.result1}')
-    
+    print(today.reached_targets_count)
 # hard part 1
     today.set_lines(simple=False)
     today.part1()
     print(f'Part 1 <HARD> result is: {today.result1}')
     today.stop()
     # 1413 too high
+    print(today.reached_targets_count)
 
 # =============================================================================
 # # simple part 2

@@ -49,7 +49,13 @@ class Today(AOC):
             self.blink_stone(1, current_blink+1)
             return None
         stone_chars = str(stone) 
+# %%
         stone_char_length = len(stone_chars)
+# %%
+
+# =============================================================================
+# 
+# =============================================================================
         if stone_char_length % 2 == 0:
             left, right = int(stone_chars[stone_char_length // 2:]), int(stone_chars[:stone_char_length // 2])
             self.blink_stone(stone=left, current_blink=current_blink+1)
@@ -87,10 +93,10 @@ if __name__ == '__main__':
     today.stop()
 
 
-# simple part 2
-    today.set_lines(simple=True) 
-    today.part2()
-    print(f'Part 2 <SIMPLE> result is: {today.result2}')
+# # simple part 2
+#     today.set_lines(simple=True) 
+#     today.part2()
+#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
 # =============================================================================
 # # hard part 2
