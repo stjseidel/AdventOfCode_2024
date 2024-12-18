@@ -226,7 +226,7 @@ class AOC():
         if type(term) != list:
             term = list(term)
         if len(term) < len(this_list):
-            term = term + term[0] * (len(this_list) - len(term))
+            term = term[0] * (len(this_list) - len(term))
         for c, char in enumerate(term):
             pair = this_list[c]
             # self.grid[pair[0]][pair[1]] = char
