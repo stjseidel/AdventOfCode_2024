@@ -11,7 +11,6 @@ from timeit import default_timer as timer
 
     
 class Today(AOC):
-    
         
     def parse_lines(self, file_path=''):
         lines = self.lines

@@ -73,6 +73,7 @@ class AOC():
             self.lines_real = self.read_lines(file_path) 
     
     def set_lines(self, simple=False):
+        self.simple = simple
         if simple:
             self.lines = self.lines_simple
         else:
@@ -217,6 +218,12 @@ class AOC():
     
     def grid_make_empty(self):
         self.grid = [['.' for c in row] for row in self.lines]
+    
+    def grid_make_empty_x_y(self, rows=6, cols=6):
+        self.grid = [['.' for c in range(cols+1)] for row in range(rows+1)]
+    
+    def grid_get_position_tuple_list_x_y(self, rows=6, cols=6):
+        return [(row, c) for c in range(cols+1) for row in range(rows+1)]
 
     def grid_enter_result(self, this_list=None, term=None, print_grid=False):
         this_list = this_list or self.this_list
