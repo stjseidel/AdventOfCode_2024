@@ -9,11 +9,39 @@ Created on Mon Dec  4 06:32:12 2023
 from aoc_class import AOC
 from timeit import default_timer as timer
 
+class Box:
+    all_instances = []
+    directions = {'<':(0, -1), '^':(1, 0), '>':(0, 1), 'v':(-1, 0)}
+    robot = None
+    
+    @classmethod
+    def get_all_instances(cls):
+        return cls.all_instances
+    
+    def __init__(self, x, y, is_robot=False):
+        self.position = (x, y)
+        Box.all_instances.append(self)
+        self.is_robot = is_robot
+        Box.robot = self
+        
+        
+    @classmethod
+    def get_positions_dict(cls):
+        cls.positions_dict = {obj.position for obj in cls.all_instances} 
+    
+        
+    
+    
     
 class Today(AOC):
         
     def parse_lines(self, file_path=''):
         lines = self.lines
+        split = self.lines.index('')
+        grid_lines = self.lines[:split]
+        self.walls = {(r, c) for r, rows in enumerate(grid_lines) for c, char in enumerate(rows) if char == '#'}
+        self.floor = {(r, c) for r, rows in enumerate(grid_lines) for c, char in enumerate(rows) if char != '#'}
+        self.commands = [char for char in ''.join(self.lines[split:])]
         # lines = [[int(lin) for lin in line.split(' ') if set(lin) != set('') ] for line in lines]
         return lines
     
