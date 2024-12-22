@@ -95,12 +95,12 @@ class Today(AOC):
         # self.print_grid()
         self.grid_enter_result(this_list=[self.robot], term='@')
         # lines = [[int(lin) for lin in line.split(' ') if set(lin) != set('') ] for line in lines]
-        self.print_grid()
+        # self.print_grid()
         return lines
     
     def part1(self):
         lines = self.parse_lines_2()
-        self.print_grid()
+        # self.print_grid()
         result = sum([self.try_to_move(from_pos=self.robot, offset=self.directions[com], com=com) for com in self.commands])
         self.result_boxes = {(r, c) for r, rows in enumerate(self.grid) for c, char in enumerate(rows) if char == 'O'}
         
@@ -137,9 +137,9 @@ class Today(AOC):
     
     def part2(self):
         lines = self.parse_lines_2()
-        self.print_grid()
-        result = sum([self.try_to_move_2(from_pos=self.robot, offset=self.directions[com], com=com) for com in self.commands])
-        self.result_boxes = {(r, c) for r, rows in enumerate(self.grid) for c, char in enumerate(rows) if char == 'O'}
+        # self.print_grid()
+        result = [self.try_to_move_2(from_pos=self.robot, offset=self.directions[com], com=com) for com in self.commands]
+        self.result_boxes = {(r, c) for r, rows in enumerate(self.grid) for c, char in enumerate(rows) if char == '['}
         
         self.result2 = sum([pos[0]*100+pos[1] for pos in self.result_boxes])
         self.time2 = timer()
@@ -147,36 +147,80 @@ class Today(AOC):
     
             
     def try_to_move_2(self, from_pos, offset, com=None):
-        # if com is not None:
-            # print(com)
+        self.moving = {}
         next_pos = self.add_tuple(from_pos, offset)
         next_char = self.grid[next_pos[0]][next_pos[1]]
         # cases where we simply move the robot
         if self.robot == from_pos:
-            self.moving = {}
+            # self.moving = {}
             if next_char == '#':
                 return None
             elif next_char == '.':
                 self.move_robot(offset)
                 return True
         # moving boxes east or west
-                    
-        if next_char == '.':
-            if next_pos != self.robot:  # only overwrite if we moved
-                self.grid[next_pos[0]][next_pos[1]] = 'O'
-            self.move_robot(offset)
-            return True
-        elif next_char == '#':
-            return False
+        stopped = False
+        self.moving[next_pos] = next_char
+        if com in '<>':
+            while not stopped:
+                next_pos = self.add_tuple(next_pos, offset)
+                next_char = self.grid[next_pos[0]][next_pos[1]]
+                if next_char in '[]':
+                    self.moving[next_pos] = next_char
+                elif next_char == '.':
+                    stopped = True
+                elif next_char == '#':
+                    stopped = True
+                    self.moving = {}
+            if len(self.moving) == 0:
+                return False
+            else:
+                self.set_new_box_positions(moving=self.moving, offset=offset)
+                self.move_robot(offset)
+                return True
+        
+        # up or down
         else:
-            self.try_to_move(next_pos, offset, com=None)   
-            return False
+            next_box_positions = self.get_entire_box(next_pos)
+            self.blocked = False
+            for pos in next_box_positions:
+                if not pos in self.moving:
+                    self.moving[pos] = self.grid[pos[0]][pos[1]]
+                    self.can_box_move(pos, offset)
+            if not self.blocked:
+                self.set_new_box_positions(moving=self.moving, offset=offset)
+                self.move_robot(offset)
+
+    def can_box_move(self, pos, offset):
+        entire_box = self.get_entire_box(pos)
+        for pos in entire_box:
+            next_pos = self.add_tuple(pos, offset)
+            next_char = self.grid[next_pos[0]][next_pos[1]]
+            if next_char == '#':
+                self.blocked = True
+                return None
+            if next_char == '.':
+                pass
+            elif next_char in '[]':
+                next_box_positions = self.get_entire_box(next_pos)
+                for pos in next_box_positions:
+                    if not pos in self.moving:
+                        self.moving[pos] = self.grid[pos[0]][pos[1]]
+                        self.can_box_move(pos, offset)
     
+    def get_entire_box(self, pos):
+        this_bracket = self.grid[pos[0]][pos[1]]
+        self.moving[pos] = this_bracket
+        if this_bracket == '[':
+            return [pos, (pos[0], pos[1]+1)]
+        else:
+            return [pos, (pos[0], pos[1]-1)]
+            
     def set_new_box_positions(self, moving, offset):
-        for pos in moving.keys():
-            self.grid[pos] = '.'
+        self.grid_enter_result(this_list=list(self.moving.keys()), term='.')
         for pos, char in moving.items():
-            self.grid[self.add_tuple(pos, offset)] = char
+            new_pos = self.add_tuple(pos, offset)
+            self.grid[new_pos[0]][new_pos[1]] = char
         
             
     def print_final(self):
@@ -199,20 +243,16 @@ if __name__ == '__main__':
     today.part1()
     print(f'Part 1 <HARD> result is: {today.result1}')
     today.stop()
-    # 1528704 too high
+# 1517819 is shown as correct, but code now results in 142882... possibly different session used to get this, was done on laptop.
 
-# =============================================================================
-# # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
-# =============================================================================
+# simple part 2
+    today.set_lines(simple=True) 
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()
