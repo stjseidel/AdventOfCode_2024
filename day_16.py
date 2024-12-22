@@ -37,7 +37,7 @@ class Today(AOC):
     
     def part1(self):
         lines = self.parse_lines()
-        print('setup done')
+        # print('setup done')
         # self.stop()
         self.explore(current=self.start)
         self.result1 = self.result_explore
@@ -56,7 +56,7 @@ class Today(AOC):
                 self.max_steps = current_points
             else:
                 self.max_steps = min(current_points, self.max_steps) 
-            print(f'{len(self.paths)}th result: {turns} turns, points: {current_points }')
+            # print(f'{len(self.paths)}th result: {turns} turns, points: {current_points }')
             if self.result_explore == 0:
                 self.result_explore = current_points 
             else:
@@ -74,7 +74,7 @@ class Today(AOC):
         #         # print(f'OVERWRITING {len(self.traced)} plots entered. This position: {current} This history has {len(history)} steps. points: {current_points}')
         # else:
         self.traced[current] = current_points
-        print(f'{len(self.traced)} plots entered. This position: {current} This history has {len(history)} steps. points: {current_points}')
+        # print(f'{len(self.traced)} plots entered. This position: {current} This history has {len(history)} steps. points: {current_points}')
         # self.traced[current] = current_points
         # else:
         next_positions = self.neighbors[current] - set(history)
@@ -101,12 +101,12 @@ class Today(AOC):
             self.grid_enter_result(this_list=[self.target], term='E')
             self.grid_enter_result(this_list=path, term='X')
             self.print_grid()
-            print(turns, points)
+            # print(turns, points)
                 
     def part2(self):
         # lines = self.parse_lines()
         histories = [path[0] for path in self.path_results[self.simple] if path[-1] == self.final_results[self.simple]]
-        print(len(histories), 'valid results')
+        # print(len(histories), 'valid results')
         valid = []
         for path in histories:
             valid.extend(path)
@@ -136,12 +136,6 @@ if __name__ == '__main__':
     today.part1()
     print(f'Part 1 <HARD> result is: {today.result1}')
     # today.stop()
-    # 614932 too high
-    # 610928 too high
-    # 149664 too high
-    # 93484  high
-    # 82460
-
 
 # simple part 2
     today.set_lines(simple=True) 
