@@ -71,7 +71,19 @@ class Today(AOC):
     
     def part2(self):
         lines = self.parse_lines()
-        # self.result2 = 'TODO'
+        self.result2 = 0
+        
+        for i, pattern in enumerate(self.patterns):
+            result = 0
+            self.solved = False
+            self.memo = defaultdict(list)
+            if not self.is_solvable(pattern):
+                continue
+            result += self.decode_pattern(pattern=pattern, done='')
+            if self.solved:
+                self.result2 += 1
+            print(i, result)
+            print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.result1}.')
         self.time2 = timer()
         return self.result2
         
