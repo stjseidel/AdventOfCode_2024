@@ -33,8 +33,8 @@ class Today(AOC):
             result += self.decode_pattern(pattern=pattern, done='')
             if self.solved:
                 self.result1 += 1
-            print(i, result)
-            print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.result1}.')
+            # print(i, result)
+            # print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.result1}.')
         self.time1 = timer()
         return self.result1
                 
@@ -67,25 +67,59 @@ class Today(AOC):
         if len(pattern_chars - option_chars) > 0:
             return False
         return True
-        
     
     def part2(self):
         lines = self.parse_lines()
-        self.result2 = 0
-        
+        self.solved_total = 0
         for i, pattern in enumerate(self.patterns):
             result = 0
+            
             self.solved = False
             self.memo = defaultdict(list)
             if not self.is_solvable(pattern):
                 continue
-            result += self.decode_pattern(pattern=pattern, done='')
-            if self.solved:
-                self.result2 += 1
-            print(i, result)
-            print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.result1}.')
+            result = self.solve_last_nth(pattern=pattern)
+            self.solved_total += result
+            # print(i, result)
+            # print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.solved_total}.')
         self.time2 = timer()
-        return self.result2
+        self.result2 = self.solved_total
+        return self.solved_total
+                
+    def decode_combined_strategy(self, pattern):
+        # first decode the last n letters, where n is > the longest pattern_piece
+        self.memo = defaultdict(list)
+        self.solve_last_nth(pattern)
+        
+    def solve_last_nth(self, pattern, nth=None):
+        nth = max(max([len(opt) for opt in self.options]) * 2 + 1, len(pattern))
+        end_memo = defaultdict(int)
+        end_options = defaultdict(list)
+        match_results = {pattern[i:]:[opt for opt in self.options if opt == pattern[i:i+len(opt)]] for i in range(len(pattern)-1, -1, -1)}
+        for i in range(len(pattern)-1, -1, -1):
+            string = pattern[i:]
+            string_length = len(string)
+            options = match_results[string]
+            this_branch = 0
+            # print(string, options)
+
+            for opt in options:
+                if opt in end_options[string_length]:
+                    this_branch += end_memo[opt]
+                
+                else:
+                    remaining_after_opt = len(string) - len(opt)
+                    
+                    if remaining_after_opt == 0:
+                        end_memo[string_length] += 1
+                        end_options[string_length].append(opt)
+                    elif remaining_after_opt in end_memo.keys():
+                        end_memo[string_length] += end_memo[remaining_after_opt]
+                        end_options[string_length].append(opt)
+                    else:
+                        pass
+            
+        return end_memo[len(pattern)]
         
     def print_final(self):
         print(f'Part 1 result is: {self.result1}. (time: {round(self.time1 - self.beginning_of_time, 2)})')
@@ -101,24 +135,21 @@ if __name__ == '__main__':
     today.set_lines(simple=True)
     today.part1()
     print(f'Part 1 <SIMPLE> result is: {today.result1}')
-    
+    6
 # hard part 1
     today.set_lines(simple=False)
     today.part1()
     print(f'Part 1 <HARD> result is: {today.result1}')
     today.stop()
 
-
 # # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
+    today.set_lines(simple=True) 
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()
