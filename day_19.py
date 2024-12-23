@@ -21,25 +21,23 @@ class Today(AOC):
         return lines
     
     def part1(self):
-        lines = self.parse_lines()
+        _ = self.parse_lines()
         self.result1 = 0
         
         for i, pattern in enumerate(self.patterns):
-            result = 0
             self.solved = False
             self.memo = defaultdict(list)
             if not self.is_solvable(pattern):
                 continue
-            result += self.decode_pattern(pattern=pattern, done='')
+            _ = self.decode_pattern(pattern=pattern, done='')
             if self.solved:
                 self.result1 += 1
-            # print(i, result)
-            # print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.result1}.')
         self.time1 = timer()
         return self.result1
                 
     def decode_pattern(self, pattern, done, last_pattern=None):
-        
+        if self.solved:
+            return 1
         remaining = pattern[len(done):]
         options = [pat for pat in self.options if re.match(pat, remaining)]
         if last_pattern is not None:
@@ -48,11 +46,8 @@ class Today(AOC):
             self.memo[done].append(last_pattern)
         if not self.is_solvable(pattern, options=options):
             return 0
-        if self.solved:
-            return 0
         for opt in options:
             this_done = f'{done}{opt}'
-            # print(pattern, this_done, opt, options)
             if this_done == pattern:
                 self.solved = True
                 return 1
@@ -69,30 +64,22 @@ class Today(AOC):
         return True
     
     def part2(self):
-        lines = self.parse_lines()
+        _ = self.parse_lines()
         self.solved_total = 0
         for i, pattern in enumerate(self.patterns):
             result = 0
-            
             self.solved = False
             self.memo = defaultdict(list)
             if not self.is_solvable(pattern):
                 continue
             result = self.solve_last_nth(pattern=pattern)
             self.solved_total += result
-            # print(i, result)
-            # print(f'{i}th pattern: solved: {self.solved}. Total solved: {self.solved_total}.')
         self.time2 = timer()
         self.result2 = self.solved_total
         return self.solved_total
                 
-    def decode_combined_strategy(self, pattern):
-        # first decode the last n letters, where n is > the longest pattern_piece
-        self.memo = defaultdict(list)
-        self.solve_last_nth(pattern)
-        
-    def solve_last_nth(self, pattern, nth=None):
-        nth = max(max([len(opt) for opt in self.options]) * 2 + 1, len(pattern))
+    def solve_last_nth(self, pattern):
+        """move backwards and use memoization"""
         end_memo = defaultdict(int)
         end_options = defaultdict(list)
         match_results = {pattern[i:]:[opt for opt in self.options if opt == pattern[i:i+len(opt)]] for i in range(len(pattern)-1, -1, -1)}
@@ -101,12 +88,10 @@ class Today(AOC):
             string_length = len(string)
             options = match_results[string]
             this_branch = 0
-            # print(string, options)
 
             for opt in options:
                 if opt in end_options[string_length]:
                     this_branch += end_memo[opt]
-                
                 else:
                     remaining_after_opt = len(string) - len(opt)
                     
