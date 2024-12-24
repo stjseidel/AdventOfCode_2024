@@ -219,6 +219,9 @@ class AOC():
     def grid_make_empty(self):
         self.grid = [['.' for c in row] for row in self.lines]
     
+    def grid_make_lines_copy(self):
+        self.grid = [[c for c in row] for row in self.lines]
+    
     def grid_make_empty_x_y(self, rows=6, cols=6):
         self.grid = [['.' for c in range(cols+1)] for row in range(rows+1)]
     
