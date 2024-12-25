@@ -43,7 +43,7 @@ class AOC():
         self.input = self.input_folder / f'{self.day}.txt'
         self.input_simple = self.input_folder  / f'{self.day}_simple.txt'
         self.simple = simple
-        self.passed_days = min(datetime.now(), datetime(2024, 12, 24)).day
+        self.passed_days = min(datetime.now(), datetime(2024, 12, 25)).day
         if int(self.day) <= int(self.passed_days):        
             self.create_txt_files()
             self.read_both_files()
