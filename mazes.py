@@ -12,13 +12,15 @@ class MazeSolver:
         pass
     
     def plot_graph(self, lines):
-        self.steps = [(row, col) for row, line in enumerate(lines) for col, char in enumerate(line) if char in ['.', 'E', 'S']]
+        self.steps = [(row, col) for row, line in enumerate(lines) for col, char in enumerate(line) if char in ['.', 'E', 'S', 'O']]
         self.walls = [(row, col) for row, line in enumerate(lines) for col, char in enumerate(line) if char == '#']
         self.origin = [(row, col) for row, line in enumerate(lines) for col, char in enumerate(line) if char == 'S'][0]
         self.target = [(row, col) for row, line in enumerate(lines) for col, char in enumerate(line) if char == 'E'][0]
         # breakpoint()
-        # self.Matrix = {(row, col):set([(row+1, col), (row, col+1), (row-1, col), (row, col-1)]) & set(self.steps) for (row, col) in self.steps}
-        self.Neighbors = {(row, col):set([(r, c) for (r,c) in [(row+1, col), (row, col+1), (row-1, col), (row, col-1)] if lines[r][c] in ['.', 'E', 'S']]) for (row, col) in self.steps}
+        try:
+            self.Neighbors = {(row, col):set([(row+1, col), (row, col+1), (row-1, col), (row, col-1)]) & set(self.steps) for (row, col) in self.steps}
+        except:
+            self.Neighbors = {(row, col):set([(r, c) for (r,c) in [(row+1, col), (row, col+1), (row-1, col), (row, col-1)] if lines[r][c] in ['.', 'E', 'S']]) for (row, col) in self.steps}
 
         self.graph = {node:{(neigh, (neigh[0]-node[0], neigh[1]-node[1])) for neigh in neighbors} for node, neighbors in self.Neighbors.items()}
         return self.graph
@@ -53,7 +55,7 @@ class MazeSolver:
                     dist[(neighbor, neighbor_dir)] = new_cost
                     heapq.heappush(pq, (new_cost, neighbor, neighbor_dir))
         # If no path found
-        return float('inf')
+        return False
     
     def dijkstra_with_directions_penalty_all_paths(self, graph, start, end, direction=None):
         # Priority queue: (cost, current_node, direction, path)
