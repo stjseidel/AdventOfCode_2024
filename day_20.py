@@ -10,7 +10,10 @@ from aoc_class import AOC
 from timeit import default_timer as timer
 from mazes import MazeSolver
 from collections import defaultdict
-
+import numpy as np
+import sys
+print(sys.getrecursionlimit())
+sys.setrecursionlimit(20000)
 class Today(AOC):
     maze_solver = MazeSolver()
         
@@ -24,16 +27,6 @@ class Today(AOC):
         self.wall_neighbors = {(row, col):
                                {(r, c) for (r,c) in [(row+1, col), (row, col+1), (row-1, col), (row, col-1)]} & set(self.steps)
                                      for (row, col) in self.walls}
-        # self.valid_cheats = [wall for wall, neighbors in self.wall_neighbors.items() if len(neighbors) >= 2]
-        self.valid_cheats = []  # valid are only walls with at least 3 neighboring steps, or 2 neighboring steps that are on opposite sides of the wall
-        for wall, neighbors in self.wall_neighbors.items():
-            neighbors = list(neighbors)
-            if len(neighbors) > 3:
-                self.valid_cheats.append(wall)
-            elif len(neighbors) == 2:
-                one, two = neighbors[0], neighbors[1]
-                if (abs(one[0]-two[0]) == 2) or abs(one[1]-two[1]) == 2:
-                    self.valid_cheats.append(wall)
                     
         # self.Matrix = {(row, col):set([(row+1, col), (row, col+1), (row-1, col), (row, col-1)]) & set(self.steps) for (row, col) in self.steps}
         self.Neighbors = {(row, col):set([(r, c) for (r,c) in [(row+1, col), (row, col+1), (row-1, col), (row, col-1)] if self.lines[r][c] in ['.', 'E', 'S']]) for (row, col) in self.steps}
@@ -41,40 +34,61 @@ class Today(AOC):
         self.result_explore = 0
         self.grid_make_lines_copy()
 
-        # lines = [[int(lin) for lin in line.split(' ') if set(lin) != set('') ] for line in lines]
         return lines
     
     def part1(self):
         lines = self.parse_lines()
-        graph = self.maze_solver.plot_graph(lines=self.grid)
-        original_time = self.maze_solver.dijkstra_with_directions_penalty(graph=graph, start=self.origin, end=self.target)
-        self.cheat_results = defaultdict(int)
-        print('original time: ', original_time)
-        counting = 0
-        for i, cheat in enumerate(self.valid_cheats):
-            self.grid[cheat[0]][cheat[1]] = '.'
-            self.maze_solver.plot_graph(lines=self.grid)
-            
-            graph = self.maze_solver.plot_graph(lines=self.grid)
-            this_time = self.maze_solver.dijkstra_with_directions_penalty(graph=graph, start=self.origin, end=self.target)
-            saved = original_time - this_time
-            # self.cheat_results[cheat] = saved
-            self.cheat_results[saved] += 1
-            self.grid[cheat[0]][cheat[1]] = '#'
-            if saved >= 100:
-                counting += 1
-            print(f'[{i} / {len(self.valid_cheats)}: {i/len(self.valid_cheats)*100:.2f}%]{cheat}, saved: {saved}. >= 100: {counting}')
+        self.graph = self.maze_solver.plot_graph(lines=self.lines)
+        costs, self.paths = self.maze_solver.dijkstra_with_directions_penalty_all_paths(graph=self.graph, start=self.origin, end=self.target, direction=None)
+        self.path = self.paths[0]
+        self._get_distance_to_target()
+        cutoff = 1 if self.simple else 100
+        self.result1 = self.get_cheats(radius=2, cutoff=cutoff)
         
-        self.result1 = sum([cheats for time, cheats in self.cheat_results.items() if time >= 100])
         self.time1 = timer()
         return self.result1
                 
     def part2(self):
         lines = self.parse_lines()
-        self.result2 = 'TODO'
+        self.graph = self.maze_solver.plot_graph(lines=self.lines)
+        costs, self.paths = self.maze_solver.dijkstra_with_directions_penalty_all_paths(graph=self.graph, start=self.origin, end=self.target, direction=None)
+        self.path = self.paths[0]
+        self._get_distance_to_target()
+        cutoff = 50 if self.simple else 100
+        self.result2 = self.get_cheats(radius=20, cutoff=cutoff)
         self.time2 = timer()
         return self.result2
+    
+    def _get_distance_to_target(self):
+        self.distances = {}
+        self._get_neighbor_distance(this=self.target, distance=0)
         
+    def get_cheats(self, radius=20, cutoff=100):
+        cheats = 0
+        self.cheat_results = defaultdict(int)
+        for pos in self.path:
+            remaining_time = self.distances[pos]
+            circle_dict = self._get_circle_around_pos(pos, radius=radius)
+            for cheat_end, cheat_duration in circle_dict.items():
+                savings = remaining_time - self.distances[cheat_end] - cheat_duration
+                if savings >= cutoff:
+                    cheats += 1
+                    self.cheat_results[savings] += 1
+                    
+        return cheats
+        
+    def _get_neighbor_distance(self, this, distance=0):
+        self.distances[this] = distance
+        for neigh in self.Neighbors[this]:
+            if neigh not in self.distances.keys():
+                self._get_neighbor_distance(neigh, distance=distance+1)
+            
+    def _get_circle_around_pos(self, pos, radius=20):    
+        circle = list(set([(row, col) for row in range(pos[0]-radius, pos[0]+radius+1) for col in range(pos[1]-radius, pos[1]+radius+1) if (abs(row-pos[0]) + abs(col-pos[1])) <= radius]) & set(self.steps))
+        
+        circle_dict = {(row, col):(abs(row-pos[0]) + abs(col-pos[1])) for (row, col) in circle}
+        return circle_dict
+    
     def print_final(self):
         print(f'Part 1 result is: {self.result1}. (time: {round(self.time1 - self.beginning_of_time, 2)})')
         print(f'Part 2 result is: {self.result2} (time: {round(self.time2 - self.time1, 2)})')
@@ -97,18 +111,14 @@ if __name__ == '__main__':
     today.stop()
 
 
-# =============================================================================
-# # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
-# =============================================================================
+# simple part 2
+    today.set_lines(simple=True) 
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
-# =============================================================================
-# # hard part 2
-#     today.set_lines(simple=False)
-#     today.part2()
-#     print(f'Part 2 <HARD> result is: {today.result2}')
-#     today.stop()
-#     today.print_final()
-# =============================================================================
+# hard part 2
+    today.set_lines(simple=False)
+    today.part2()
+    print(f'Part 2 <HARD> result is: {today.result2}')
+    today.stop()
+    today.print_final()
