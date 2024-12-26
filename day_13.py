@@ -146,7 +146,6 @@ class Today(AOC):
         #     print (i, (8400- (22*i)) % 94 == 0)
         
         
-        
         self.result2 = sum(results)
         self.time2 = timer()
         return self.result2

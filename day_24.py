@@ -31,7 +31,7 @@ class Today(AOC):
         for z_wire in self.z_wires:
             if z_wire not in self.wires_base:
                 self.wires_base[z_wire] = None
-            
+        self.wires_current = self.wires_base.copy()
         return lines
     
     
@@ -40,22 +40,18 @@ class Today(AOC):
         lines = self.parse_lines()
         self.run_operations()
         # self.print_all_wires()
+        self.result_decimal = int(self.result_binary, 2)
         self.result1 = self.result_decimal
         self.time1 = timer()
         return self.result1
 
     def run_operations(self):
-        self.wires_current = self.wires_base.copy()
         solved = False
         while not solved:
             for op in self.operations:
-                
                 self.run_op(*op)
                 solved = self.is_solved()
                 
-
-            
-            
     def run_op(self, in_one, op, in_two, output):
         for key in [in_one, in_two, output]:
             if key not in self.wires_current:
@@ -77,16 +73,15 @@ class Today(AOC):
             pass
         return result
         
-    def get_result(self):
+    def get_result(self, kind='z'):
         values = {}
-        values = [None] * sum([wire[0] == 'z' for wire in self.wires_current])
+        values = [None] * sum([wire[0] == kind for wire in self.wires_current])
         for wire, value in self.wires_current.items():
-            if wire[0] == 'z':
+            if wire[0] == kind:
                 # print(wire, value)
                 values[int(wire[1:])] = value
                 # print(values)
         self.result_binary = ''.join([str(val) for val in values[::-1]])
-        self.result_decimal = int(self.result_binary, 2)
         # print(f'binary: {self.result_binary}; decimal: {self.result_decimal}')
         
     def print_all_wires(self):
@@ -102,10 +97,33 @@ class Today(AOC):
         
         return True
         
-    
     def part2(self):
         lines = self.parse_lines()
-        self.result2 = 'TODO'
+        self.get_result(kind='x')
+        x_binary = self.result_binary
+        x_decimal = int(x_binary, 2)
+        self.get_result(kind='y')
+        y_binary = self.result_binary
+        y_decimal = int(y_binary, 2)
+        self.run_operations()
+        self.get_result(kind='z')
+        z_binary = self.result_binary
+        z_decimal = int(y_binary, 2)
+        
+        print(f'{x_binary} + {y_binary} = {z_binary}')
+        print(f'{x_decimal} + {y_decimal} = {z_decimal}')
+        
+        
+        expected_result_binary = bin(x_decimal + y_decimal)[2:]
+        
+        print(f'expected: {expected_result_binary}; returned result: {z_binary}')
+        expected_result_binary = str(expected_result_binary).zfill(len(str(z_binary)))
+        z_binary = str(z_binary).zfill(len(str(expected_result_binary)))
+        
+        [char if char == z_binary[i] else 'X' for i, char in enumerate(expected_result_binary)]
+        
+        # self.print_all_wires()
+        self.result2 = z_decimal
         self.time2 = timer()
         return self.result2
         
@@ -131,12 +149,10 @@ if __name__ == '__main__':
     today.stop()
 
 
-# =============================================================================
-# # simple part 2
-#     today.set_lines(simple=True) 
-#     today.part2()
-#     print(f'Part 2 <SIMPLE> result is: {today.result2}')
-# =============================================================================
+# simple part 2
+    today.set_lines(simple=True) 
+    today.part2()
+    print(f'Part 2 <SIMPLE> result is: {today.result2}')
 
 # =============================================================================
 # # hard part 2

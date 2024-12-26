@@ -41,7 +41,7 @@ class Today(AOC):
             opcode, value = self.program[self.jumper:self.jumper+2]
             self.run_up(opcode, value)
             # print(f'{self.jumper}, [{opcode}, {value}]. {self.reg_a}, {self.reg_b}, {self.reg_c}. Output: <{self.output}>')
-        self.print_output()
+        # self.print_output()
         
     def run_up(self, opcode, value):
         # print(f'{opcode}, {value}')
@@ -182,7 +182,7 @@ class Today(AOC):
             
         while not found:
             digit += 1
-            print(f'run {digit}')
+            # print(f'run {digit}')
             self.reg_a = digit
             self.reg_b, self.reg_c = reg_b, reg_c
             self.program = program
