@@ -147,7 +147,7 @@ class AOC():
         if response.status_code == 200:
             return BeautifulSoup(response.text, 'html.parser')
         else:
-            print(f"Failed to fetch page for day {day}: {response.status_code}")
+            print(f"Failed to fetch page for day {self.day}: {response.status_code}")
             return None        
     
     def fetch_input_simple(self, day: int):
